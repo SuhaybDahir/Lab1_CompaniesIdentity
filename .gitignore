@@ -1,0 +1,19 @@
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+*.userprefs
+
+# VS cache
+.vs/
+
+# Configuration files with secrets
+appsettings.Development.json
+appsettings.Production.json
+
+# Publish outputs
+publish/
