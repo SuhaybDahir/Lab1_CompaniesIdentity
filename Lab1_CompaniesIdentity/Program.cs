@@ -20,20 +20,25 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
         options.SignIn.RequireConfirmedAccount = true)
-    .AddRoles<IdentityRole>() 
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-//  Seed roles and users on startup
+// === Apply migrations and seed on startup ===
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+
+    // 1) Ensure DB schema is up to date (Production-safe)
+    var db = services.GetRequiredService<ApplicationDbContext>();
+    await db.Database.MigrateAsync();
+
+    // 2) Seed default roles/users
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-
     await DbInitializer.SeedRolesAndUsersAsync(userManager, roleManager);
 }
 
@@ -45,7 +50,7 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+    app.UseHsts(); // HSTS in Production
 }
 
 app.UseHttpsRedirection();
